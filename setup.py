@@ -8,7 +8,7 @@ config = {
 	'author': 'meisnewbie',
 	'url': 'PLACEHOLDER.',
 	'download_url': 'ALSO PLACEHOLDER PROBABLY GITHUB',
-	'author_email': 'ahchang012@gmail.com',
+	'author_email': 'Micaiah@server.fake',
 	'version': '0.1',
 	'install_requires': ['nose'],
 	'packages': ['scraper'],
