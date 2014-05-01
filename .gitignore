@@ -3,3 +3,4 @@
 /users/*.txt
 *.pyc
 /scraper/users/*.txt
+/scraper/*.txt
