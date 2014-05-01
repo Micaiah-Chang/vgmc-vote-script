@@ -1,0 +1,158 @@
+'''This file reads from new_info.txt or asks for some file
+and then populates a new text list with all the users in the topic.
+
+TO DOs
+URGENT:
+Change nominations in that user file
+Actually test this using a text file with random people in it.
+
+Secondary:
+Ensure that the user file is robust to changes.
+Have an 'alias list' where everyone's alts can be recorded. 
+
+Nice to have:
+Eliminate duplicate names / 'Correct' a file or song name
+
+'''
+
+from sys import argv
+from collections import defaultdict
+import os
+# import string
+
+# NOTE: Currently the nominations are in format game | track | link
+
+def read_file(filename):
+    '''Reads the files line by line,
+    Parses things the following way:
+    Checks to see if POSTED is next line, indicates username.
+    When the countdown is 0, it has reached the postnumber line'''
+    users = defaultdict(list)
+    post_number = ''
+    previous = ''
+    
+    countdown = -1 # At -1 so it never hits 0 when decremented.
+    
+    
+    with open(filename) as input_file:
+        current = input_file.readline()
+        while current != '':
+            if previous != '':
+                moderator_catch = previous
+            previous = current
+            current = input_file.readline()
+            atoms = current.split()
+
+            if atoms != [] and atoms[0] == 'Posted' \
+            and (atoms[-1] == 'AM' or atoms[-1] == 'PM'):
+                current_user = previous.split('\n')[0]
+                if current_user == "(Moderator)":
+                    current_user = moderator_catch.split('\n')[0]
+                users[current_user] 
+                #default dict initialization
+
+                countdown = 4 # The post number comes 3 lines after
+            countdown -= 1    
+            if countdown == 0 and len(atoms) != 0:
+                post_number = atoms[0]
+            elif len(atoms) == 0: 
+                countdown += 1
+
+            # In order, checks that it's a Nomination
+            # it's not the message header
+            # and it's not in a quote
+            if '|' in atoms and atoms[-1] != 'quote' and \
+                    not current.startswith("    "):
+                game, track, link = nomination(current, current_user)
+                users[current_user].append((game, 
+                                            track, 
+                                            link, 
+                                            post_number))
+
+    return users, post_number
+    
+def nomination(line, user):
+    '''Parsing each legal line as a nomination.'''
+    item = line.split("|")
+    item = [element.strip() for element in item]
+
+        
+    item = [x for x in item if x != '']
+    game, track, link = '', '', ''
+    if len(item) > 2:
+        game, track, link = item[:3]
+    elif len(item) == 2:
+        game, track = item[:2]
+        link = "LINK MISSING" 
+    elif len(item) == 1:
+        game = item[0]
+        track = "TRACK MISSING"
+        link = "LINK"
+        print "WARNING!", user, " hasn't submitted a track!"
+
+
+    return game, track, link
+
+def write_to_file(users):
+    '''Writes the user dict to all the files '''
+    for element in users:
+# Not yet implemented functionality for alt detection        
+#        if element in alias(): 
+#           pass
+        if not os.path.exists('./users/'+ element +'.txt'):
+            txt_file = open('./users/'+ element +'.txt', 'w')
+        else:
+            # txt_file = open('./users/'+ element +'.txt', 'w')
+            # Change to a when time for real thing
+            txt_file = open('./users/'+ element +'.txt', 'a')
+
+
+        for item in users[element]:
+            txt_file.write(item[0]+"\n")
+            txt_file.write(item[1]+"\n")
+            txt_file.write(item[2]+"\n")
+            txt_file.write("\n")
+            strange_things(users, element, item)
+            
+    txt_file.close()
+    return None
+
+def strange_things(users, element, item):
+    '''Reports irregularities in nominations '''
+    user_things = [part for part in item]
+    if "TRACK MISSING" in user_things:
+        print "Post number", item[3], "from", element, "is missing a track!"
+    elif "LINK MISSING" in user_things:
+        print "Post number", item[3], "from", element, "is missing a link."
+    elif users[element] == []:
+        print element, "has made no nominations in post no.", item[3]
+    else:
+        pass
+            
+def alias():
+    '''Detects track names or alts via
+some preset configuration file '''
+    pass
+
+if __name__ == "__main__":
+    if len(argv) > 1:
+        SCRIPT, FILENAME = argv[0], argv[1]
+    else:
+        print "File? Default: new_info.txt"
+        FILENAME = raw_input('--> ')
+        if FILENAME == 'prompt' or FILENAME == '':
+            FILENAME = 'new_info.txt'
+ 
+    ALL_USERS, LAST_POST = read_file(FILENAME)
+    if os.path.exists('last_updated.txt'):
+        LAST_UPDATED = open('last_updated.txt').read()
+        if LAST_POST == LAST_UPDATED:
+            print "Whoops! Looks like you tried to update twice in a row!"
+            print "Failing gracefully so you don't write twice."
+            raise SystemExit
+    write_to_file(ALL_USERS)
+    UPDATE = open('last_updated.txt', 'w')
+    UPDATE.write(str(LAST_POST))
+    UPDATE.close()
+    print "File updating until post", LAST_POST, "in the topic."
+    raise SystemExit
