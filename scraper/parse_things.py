@@ -87,21 +87,18 @@ def read_file(filename):
     
 def nomination(line, user):
     '''Parsing each legal line as a nomination.'''
-    item = line.split("|")
-    item = [element.strip() for element in item]
+    item = [element.strip() for element in line.split("|") if element != '']
+    # Split up the nomination into three parts:
+    # game, track, link
 
-        
-    item = [x for x in item if x != '']
-    game, track, link = '', '', ''
-    if len(item) > 2:
+    
+    game, track, link = '', 'TRACK MISSING', 'LINK MISSING'
+    if len(item) == 3:
         game, track, link = item[:3]
     elif len(item) == 2:
         game, track = item[:2]
-        link = "LINK MISSING" 
     elif len(item) == 1:
         game = item[0]
-        track = "TRACK MISSING"
-        link = "LINK"
         print "WARNING!", user, " hasn't submitted a track!"
 
 
