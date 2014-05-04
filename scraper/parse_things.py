@@ -110,6 +110,7 @@ def write_to_file(users):
 # Not yet implemented functionality for alt detection        
 #        if element in alias(): 
 #           pass
+
         if not os.path.exists('./users/'+ element +'.txt'):
             txt_file = open('./users/'+ element +'.txt', 'w')
         else:
@@ -119,13 +120,15 @@ def write_to_file(users):
 
 
         for item in users[element]:
-            txt_file.write(item[0]+"\n")
-            txt_file.write(item[1]+"\n")
-            txt_file.write(item[2]+"\n")
+            for entry in item:
+                if not entry.isdigit():
+                    txt_file.write(entry+"\n")
+
             txt_file.write("\n")
             strange_things(users, element, item)
             
     txt_file.close()
+    
     return None
 
 def strange_things(users, element, item):
