@@ -6,7 +6,7 @@ examples are legit noms)
 
 Then run
 
-python parse_things.py 
+python parser.py 
 
 The program will run and update all the text files in ./users
 
