@@ -293,11 +293,12 @@ def nominations_left(all_users):
     last_updated = open('last_updated.txt', 'r').read()
     nom_file.write("Updated up to post: "+last_updated+"\n")
     for current_user in all_users:
-        nom_file.write(current_user.name+'\n')
-        nom_file.write("User has ")
-        nom_file.write(str(20 - len(current_user.noms)))
-        nom_file.write(" nominations and ")
-        nom_file.write(str(5 - current_user.doubles)+" doubles left.\n\n")
+        noms_left = 20 - len(current_user.noms)
+        doubles_left = 5 - current_user.doubles
+        nom_file.write(current_user.name+'\n'+"User has "+
+                       str(noms_left)+
+                       " nominations and "+
+                       str(doubles_left)+" doubles left.\n\n")
 
 
 def consolidate(users, tally_file):
