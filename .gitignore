@@ -4,3 +4,4 @@
 *.pyc
 /scraper/users/*.txt
 /scraper/*.txt
+*.tsv
