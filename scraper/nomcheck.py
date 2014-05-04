@@ -319,9 +319,15 @@ def consolidate(users, tally_file):
             # This records the number of unique users
 
     noms = invert_dict(noms)
+    
     for key in sorted(noms, reverse=True):
-        tally_file.write('Votes: ' + str(int(math.floor(key))))
-        tally_file.write(' Users: ' + str(1000*(key - math.floor(key))) + '\n')
+        num_of_users = math.trunc(1000*(key - math.floor(key)))
+        num_of_votes = int(math.floor(key))
+        num_of_doubles = int(num_of_votes - num_of_users)
+        
+        tally_file.write('Votes: ' + str(num_of_votes))
+        tally_file.write(' Users: ' + str(num_of_users))
+        tally_file.write(' Doubles: '+ str(num_of_doubles) + '\n')
         for item in noms[key]:
             for element in item:
                 tally_file.write(element+' | ')
