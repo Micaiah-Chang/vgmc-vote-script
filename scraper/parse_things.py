@@ -18,9 +18,32 @@ Eliminate duplicate names / 'Correct' a file or song name
 from sys import argv
 from collections import defaultdict
 import os
+import re
 # import string
 
 # NOTE: Currently the nominations are in format game | track | link
+
+def is_message_header(atoms):
+    '''Takes a line and determines if it is a message header
+    or not.'''
+
+    if len(atoms) < 12:
+        return False
+    
+    re_post_number = re.compile("#\d+")
+    has_post_number = (re_post_number.match(atoms[0])) is not None
+
+    has_quote = atoms[-1] == "quote"
+    has_message_detail = (atoms[-4] == "message" and
+                        atoms[-3] == "detail")
+        
+    return has_post_number and has_quote and has_message_detail
+
+def is_valid_nom(atoms):
+    '''Checks to see if the line is a valid nomiation'''
+    contains_separator = ('|' in atoms)
+    header = is_message_header(atoms)
+    return contains_separator and not header
 
 def read_file(filename):
     '''Reads the files line by line,
@@ -39,36 +62,27 @@ def read_file(filename):
         while current != '':
             if previous != '':
                 moderator_catch = previous
-            previous = current
-            current = input_file.readline()
             atoms = current.split()
-
-            if atoms != [] and atoms[0] == 'Posted' \
-            and (atoms[-1] == 'AM' or atoms[-1] == 'PM'):
-                current_user = previous.split('\n')[0]
+            
+            if is_message_header(atoms):
+                current_user = atoms[2]
                 if current_user == "(Moderator)":
-                    current_user = moderator_catch.split('\n')[0]
+                    current_user = moderator_catch.split('\n')[0] # this is broken
+                    # may not need this anymore if it dosn't break on moderators
                 users[current_user] 
-                #default dict initialization
-
-                countdown = 4 # The post number comes 3 lines after
-            countdown -= 1    
-            if countdown == 0 and len(atoms) != 0:
-                post_number = atoms[0]
-            elif len(atoms) == 0: 
-                countdown += 1
+                post_number = atoms[0][1:]   # remove the hashtag
 
             # In order, checks that it's a Nomination
             # it's not the message header
             # and it's not in a quote
-            if '|' in atoms and atoms[-1] != 'quote' and \
-                    not current.startswith("    "):
+            if is_valid_nom(atoms):
                 game, track, link = nomination(current, current_user)
                 users[current_user].append((game, 
                                             track, 
                                             link, 
                                             post_number))
-
+                
+            current = input_file.readline()
     return users, post_number
     
 def nomination(line, user):
