@@ -5,3 +5,7 @@
 /scraper/users/*.txt
 /scraper/*.txt
 *.tsv
+\#*\#*
+.py~
+/scraper/bs4/
+*.html
