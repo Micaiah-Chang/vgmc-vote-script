@@ -35,7 +35,7 @@ def is_message_header(atoms):
 
     has_quote = atoms[-1] == "quote"
     has_message_detail = (atoms[-4] == "message" and
-                        atoms[-3] == "detail")
+                            atoms[-3] == "detail")
         
     return has_post_number and has_quote and has_message_detail
 
@@ -67,14 +67,17 @@ def read_file(filename):
             if is_message_header(atoms):
                 current_user = atoms[2]
                 if current_user == "(Moderator)":
-                    current_user = moderator_catch.split('\n')[0] # this is broken
-                    # may not need this anymore if it dosn't break on moderators
+                    current_user = moderator_catch.split('\n')[0]
+                    # this is broken
+                    # may not need this anymore if
+                    # it doesn't break on moderators   
                 users[current_user] 
                 post_number = atoms[0][1:]   # remove the hashtag
 
             # In order, checks that it's a Nomination
             # it's not the message header
             # and it's not in a quote
+            
             if is_valid_nom(atoms):
                 game, track, link = nomination(current, current_user)
                 users[current_user].append((game, 
@@ -84,7 +87,8 @@ def read_file(filename):
                 
             current = input_file.readline()
     return users, post_number
-    
+
+        
 def nomination(line, user):
     '''Parsing each legal line as a nomination.'''
     item = [element.strip() for element in line.split("|") if element != '']
@@ -107,10 +111,6 @@ def nomination(line, user):
 def write_to_file(users):
     '''Writes the user dict to all the files '''
     for element in users:
-# Not yet implemented functionality for alt detection        
-#        if element in alias(): 
-#           pass
-
         if not os.path.exists('./users/'+ element +'.txt'):
             txt_file = open('./users/'+ element +'.txt', 'w')
         else:
@@ -125,13 +125,13 @@ def write_to_file(users):
                     txt_file.write(entry+"\n")
 
             txt_file.write("\n")
-            strange_things(users, element, item)
+            detect_abnormality(users, element, item)
             
-    txt_file.close()
+#    txt_file.close()
     
     return None
 
-def strange_things(users, element, item):
+def detect_abnormality(users, element, item):
     '''Reports irregularities in nominations '''
     user_things = [part for part in item]
     if "TRACK MISSING" in user_things:
@@ -159,14 +159,16 @@ if __name__ == "__main__":
  
     ALL_USERS, LAST_POST = read_file(FILENAME)
     if os.path.exists('last_updated.txt'):
-        LAST_UPDATED = open('last_updated.txt').read()
-        if LAST_POST == LAST_UPDATED:
-            print "Whoops! Looks like you tried to update twice in a row!"
-            print "Failing gracefully so you don't write twice."
-            raise SystemExit
+        with open('last_updated.txt') as f:
+            LAST_UPDATED = f.read()
+            if LAST_POST == LAST_UPDATED:
+                print "Whoops! Looks like you tried to update twice in a row!"
+                print "Failing gracefully so you don't write twice."
+                raise SystemExit
     write_to_file(ALL_USERS)
-    UPDATE = open('last_updated.txt', 'w')
-    UPDATE.write(str(LAST_POST))
-    UPDATE.close()
-    print "File updating until post", LAST_POST, "in the topic."
+
+    with open('last_updated.txt', 'w') as UPDATE:
+        UPDATE.write(str(LAST_POST))
+        print "File updating until post", LAST_POST, "in the topic."
+
     raise SystemExit
