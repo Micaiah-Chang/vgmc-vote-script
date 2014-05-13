@@ -12,7 +12,6 @@ Have an 'alias list' where everyone's alts can be recorded.
 
 Nice to have:
 Eliminate duplicate names / 'Correct' a file or song name
-
 '''
 
 from sys import argv
@@ -45,25 +44,39 @@ def is_valid_nom(atoms):
     header = is_message_header(atoms)
     return contains_separator and not header
 
-def read_file(filename):
-    '''Reads the files line by line,
+def read_file(filename, extension):
+    '''Dispatch file parsing function
+    depending on extension type.'''
+
+    
+    if extension == ".txt":
+        users, post_number  = read_text_file(filename)
+    else:
+        raise Exception
+    return users, post_number
+
+
+
+
+
+def read_text_file(filename):
+    '''Procedure for reading text files.
+    Reads the files line by line,
     Parses things the following way:
-    Checks to see if POSTED is next line, indicates username.
-    When the countdown is 0, it has reached the postnumber line'''
+    Checks to see if POSTED is next line, indicates username.'''
+
     users = defaultdict(list)
     post_number = ''
     previous = ''
     
     countdown = -1 # At -1 so it never hits 0 when decremented.
-    
-    
     with open(filename) as input_file:
         current = input_file.readline()
         while current != '':
             if previous != '':
                 moderator_catch = previous
             atoms = current.split()
-            
+
             if is_message_header(atoms):
                 current_user = atoms[2]
                 if current_user == "(Moderator)":
@@ -148,16 +161,26 @@ def alias():
 some preset configuration file '''
     pass
 
-if __name__ == "__main__":
+def decide_input():
+    '''Ask for an input file and decide how to parse based on that.'''
     if len(argv) > 1:
-        SCRIPT, FILENAME = argv[0], argv[1]
+        script, filename = argv[0], argv[1]
     else:
         print "File? Default: new_info.txt"
-        FILENAME = raw_input('--> ')
-        if FILENAME == 'prompt' or FILENAME == '':
-            FILENAME = 'new_info.txt'
- 
-    ALL_USERS, LAST_POST = read_file(FILENAME)
+        filename = raw_input('--> ')
+        if filename == 'prompt' or filename == '':
+            filename = 'new_info.txt'
+            
+    return filename
+
+
+
+if __name__ == "__main__":
+    FILENAME = decide_input()
+
+    _, EXTENSION = os.path.splitext(FILENAME)
+
+    ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION)
     if os.path.exists('last_updated.txt'):
         with open('last_updated.txt') as f:
             LAST_UPDATED = f.read()
