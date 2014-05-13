@@ -18,6 +18,7 @@ from sys import argv
 from collections import defaultdict
 import os
 import re
+from bs4 import BeautifulSoup, Tag
 # import string
 
 # NOTE: Currently the nominations are in format game | track | link
@@ -51,11 +52,75 @@ def read_file(filename, extension):
     
     if extension == ".txt":
         users, post_number  = read_text_file(filename)
+    elif extension == ".html":
+        users, post_number = read_html_file(filename)
     else:
         raise Exception
     return users, post_number
 
+def parse_html_header(header):
+    for child in header.children:
+        msg_txt = child.find("div").contents
+        re_post_number = re.compile("#\d+")
+        has_post_number = re_post_number.match(msg_txt[0])
+        post_no =  has_post_number.group()
+        post_no = post_no[1:] # remove hashmark
 
+        user = child.find("a").contents[0].string
+
+    return user, post_no
+
+
+def read_html_file(filename):
+    ''' Procedure for reading html files.
+    Reads the files by traversing the html tree.'''
+    users = defaultdict(list)
+    post_number = ''
+
+    with open(filename) as f:
+        html_doc = f.read()
+        soup = BeautifulSoup(html_doc)
+
+
+    post_iter = soup.find_all("tr", "top")
+
+
+    for header in post_iter:
+        current_user, post_number = parse_html_header(header)
+        post_body = header.next_sibling
+        post_body = remove_quotes(post_body)
+        users = noms_from_post(users,
+                                current_user,
+                                post_body,
+                                post_number)
+        
+    return users, post_number
+    
+
+def noms_from_post(users, current_user, post_body, post_number):
+    '''Obtains nomations from an html version of post'''
+    for line in post_body.strings:
+        atoms = line.split()
+        if is_valid_nom(atoms):
+            game, track, link = nomination(line, current_user)
+            users[current_user].append((game, 
+                                track, 
+                                link,
+                                post_number))
+           
+
+    return users
+
+
+
+
+def remove_quotes(post):
+    '''Removes quoted messages from post'''
+    for tag in post.descendants:
+        if isinstance(tag, Tag) and not (tag.blockquote is None):
+            tag.blockquote.extract()
+           
+    return post
 
 
 
