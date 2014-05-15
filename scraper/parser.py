@@ -8,10 +8,12 @@ Actually test this using a text file with random people in it.
 
 Secondary:
 Ensure that the user file is robust to changes.
-Have an 'alias list' where everyone's alts can be recorded. 
+Have an 'alias list' where everyone's alts can be recorded.
 
 Nice to have:
 Eliminate duplicate names / 'Correct' a file or song name
+
+HTML from 05/14/2014
 '''
 
 from sys import argv
@@ -29,14 +31,13 @@ def is_message_header(atoms):
 
     if len(atoms) < 12:
         return False
-    
-    re_post_number = re.compile("#\d+")
+
+    re_post_number = re.compile(r"#\d+")
     has_post_number = (re_post_number.match(atoms[0])) is not None
 
     has_quote = atoms[-1] == "quote"
-    has_message_detail = (atoms[-4] == "message" and
-                            atoms[-3] == "detail")
-        
+    has_message_detail = (atoms[-4] == "message" and atoms[-3] == "detail")
+
     return has_post_number and has_quote and has_message_detail
 
 def is_valid_nom(atoms):
@@ -49,9 +50,9 @@ def read_file(filename, extension):
     '''Dispatch file parsing function
     depending on extension type.'''
 
-    
+
     if extension == ".txt":
-        users, post_number  = read_text_file(filename)
+        users, post_number = read_text_file(filename)
     elif extension == ".html":
         users, post_number = read_html_file(filename)
     else:
@@ -59,11 +60,13 @@ def read_file(filename, extension):
     return users, post_number
 
 def parse_html_header(header):
+    '''Find post number and username from message header.
+    HTML from 05/14/2014'''
     for child in header.children:
         msg_txt = child.find("div").contents
-        re_post_number = re.compile("#\d+")
+        re_post_number = re.compile(r"#\d+")
         has_post_number = re_post_number.match(msg_txt[0])
-        post_no =  has_post_number.group()
+        post_no = has_post_number.group()
         post_no = post_no[1:] # remove hashmark
 
         user = child.find("a").contents[0].string
@@ -77,8 +80,8 @@ def read_html_file(filename):
     users = defaultdict(list)
     post_number = ''
 
-    with open(filename) as f:
-        html_doc = f.read()
+    with open(filename) as f_doc:
+        html_doc = f_doc.read()
         soup = BeautifulSoup(html_doc)
 
 
@@ -89,13 +92,10 @@ def read_html_file(filename):
         current_user, post_number = parse_html_header(header)
         post_body = header.next_sibling
         post_body = remove_quotes(post_body)
-        users = noms_from_post(users,
-                                current_user,
-                                post_body,
-                                post_number)
-        
+        users = noms_from_post(users, current_user, post_body, post_number)
+
     return users, post_number
-    
+
 
 def noms_from_post(users, current_user, post_body, post_number):
     '''Obtains nomations from an html version of post'''
@@ -103,11 +103,8 @@ def noms_from_post(users, current_user, post_body, post_number):
         atoms = line.split()
         if is_valid_nom(atoms):
             game, track, link = nomination(line, current_user)
-            users[current_user].append((game, 
-                                track, 
-                                link,
-                                post_number))
-           
+            users[current_user].append((game, track, link, post_number))
+
 
     return users
 
@@ -117,9 +114,9 @@ def noms_from_post(users, current_user, post_body, post_number):
 def remove_quotes(post):
     '''Removes quoted messages from post'''
     for tag in post.descendants:
-        if isinstance(tag, Tag) and not (tag.blockquote is None):
+        if isinstance(tag, Tag) and not tag.blockquote is None:
             tag.blockquote.extract()
-           
+
     return post
 
 
@@ -133,8 +130,8 @@ def read_text_file(filename):
     users = defaultdict(list)
     post_number = ''
     previous = ''
-    
-    countdown = -1 # At -1 so it never hits 0 when decremented.
+
+
     with open(filename) as input_file:
         current = input_file.readline()
         while current != '':
@@ -144,36 +141,31 @@ def read_text_file(filename):
 
             if is_message_header(atoms):
                 current_user = atoms[2]
-                if current_user == "(Moderator)":
-                    current_user = moderator_catch.split('\n')[0]
-                    # this is broken
-                    # may not need this anymore if
-                    # it doesn't break on moderators   
-                users[current_user] 
+                users[current_user]
                 post_number = atoms[0][1:]   # remove the hashtag
 
             # In order, checks that it's a Nomination
             # it's not the message header
             # and it's not in a quote
-            
+
             if is_valid_nom(atoms):
                 game, track, link = nomination(current, current_user)
-                users[current_user].append((game, 
-                                            track, 
-                                            link, 
+                users[current_user].append((game,
+                                            track,
+                                            link,
                                             post_number))
-                
+
             current = input_file.readline()
     return users, post_number
 
-        
+
 def nomination(line, user):
     '''Parsing each legal line as a nomination.'''
     item = [element.strip() for element in line.split("|") if element != '']
     # Split up the nomination into three parts:
     # game, track, link
 
-    
+
     game, track, link = '', 'TRACK MISSING', 'LINK MISSING'
     if len(item) == 3:
         game, track, link = item[:3]
@@ -204,9 +196,9 @@ def write_to_file(users):
 
             txt_file.write("\n")
             detect_abnormality(users, element, item)
-            
+
 #    txt_file.close()
-    
+
     return None
 
 def detect_abnormality(users, element, item):
@@ -220,7 +212,7 @@ def detect_abnormality(users, element, item):
         print element, "has made no nominations in post no.", item[3]
     else:
         pass
-            
+
 def alias():
     '''Detects track names or alts via
 some preset configuration file '''
@@ -229,13 +221,13 @@ some preset configuration file '''
 def decide_input():
     '''Ask for an input file and decide how to parse based on that.'''
     if len(argv) > 1:
-        script, filename = argv[0], argv[1]
+        _, filename = argv[0], argv[1]
     else:
         print "File? Default: new_info.txt"
         filename = raw_input('--> ')
         if filename == 'prompt' or filename == '':
             filename = 'new_info.txt'
-            
+
     return filename
 
 
@@ -247,12 +239,12 @@ if __name__ == "__main__":
 
     ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION)
     if os.path.exists('last_updated.txt'):
-        with open('last_updated.txt') as f:
-            LAST_UPDATED = f.read()
-            if LAST_POST == LAST_UPDATED:
-                print "Whoops! Looks like you tried to update twice in a row!"
-                print "Failing gracefully so you don't write twice."
-                raise SystemExit
+        with open('last_updated.txt') as f_update:
+            LAST_UPDATED = f_update.read()
+        if int(LAST_UPDATED) >= int(LAST_POST):
+            print "Whoops! Looks like you tried to update twice in a row!"
+            print "Failing gracefully so you don't write twice."
+            raise SystemExit
     write_to_file(ALL_USERS)
 
     with open('last_updated.txt', 'w') as UPDATE:
