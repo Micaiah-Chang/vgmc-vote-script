@@ -46,7 +46,7 @@ def is_valid_nom(atoms):
     header = is_message_header(atoms)
     return contains_separator and not header
 
-def read_file(filename, extension):
+def read_file(filename, extension, last_updated):
     '''Dispatch file parsing function
     depending on extension type.'''
 
@@ -54,7 +54,7 @@ def read_file(filename, extension):
     if extension == ".txt":
         users, post_number = read_text_file(filename)
     elif extension == ".html":
-        users, post_number = read_html_file(filename)
+        users, post_number = read_html_file(filename, last_updated)
     else:
         raise Exception
     return users, post_number
@@ -67,14 +67,14 @@ def parse_html_header(header):
         re_post_number = re.compile(r"#\d+")
         has_post_number = re_post_number.match(msg_txt[0])
         post_no = has_post_number.group()
-        post_no = post_no[1:] # remove hashmark
+        post_no = post_no[1:] # remove hashmark and convert to number
 
         user = child.find("a").contents[0].string
 
     return user, post_no
 
 
-def read_html_file(filename):
+def read_html_file(filename, last_updated):
     ''' Procedure for reading html files.
     Reads the files by traversing the html tree.'''
     users = defaultdict(list)
@@ -90,6 +90,17 @@ def read_html_file(filename):
 
     for header in post_iter:
         current_user, post_number = parse_html_header(header)
+
+        if (int(post_number) <= last_updated and
+            last_updated != 500):
+            continue
+
+
+        # If the current post being parsed is
+        # Not as far along as the one that was last parsed
+        # Skip it and do nothing
+        # If last post was the max post then ignore this.
+
         post_body = header.next_sibling
         post_body = remove_quotes(post_body)
         users = noms_from_post(users, current_user, post_body, post_number)
@@ -237,14 +248,20 @@ if __name__ == "__main__":
 
     _, EXTENSION = os.path.splitext(FILENAME)
 
-    ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION)
+    with open('last_updated.txt') as f_update:
+        LAST_UPDATED = f_update.read()
+        if LAST_UPDATED == '':
+            LAST_UPDATED = 0
+        else:
+            LAST_UPDATED = int(LAST_UPDATED)
+
+    ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION, LAST_UPDATED)
     if os.path.exists('last_updated.txt'):
-        with open('last_updated.txt') as f_update:
-            LAST_UPDATED = f_update.read()
-        if int(LAST_UPDATED) >= int(LAST_POST):
+        if int(LAST_UPDATED) >= int(LAST_POST) and int(LAST_UPDATED) != 500:
             print "Whoops! Looks like you tried to update twice in a row!"
             print "Failing gracefully so you don't write twice."
             raise SystemExit
+
     write_to_file(ALL_USERS)
 
     with open('last_updated.txt', 'w') as UPDATE:
