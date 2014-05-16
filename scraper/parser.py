@@ -46,15 +46,15 @@ def is_valid_nom(atoms):
     header = is_message_header(atoms)
     return contains_separator and not header
 
-def read_file(filename, extension, last_updated):
+def read_file(filename, extension, last_updated, alt_dict):
     '''Dispatch file parsing function
     depending on extension type.'''
 
 
     if extension == ".txt":
-        users, post_number = read_text_file(filename)
+        users, post_number = read_text_file(filename, alt_dict)
     elif extension == ".html":
-        users, post_number = read_html_file(filename, last_updated)
+        users, post_number = read_html_file(filename, alt_dict, last_updated)
     else:
         raise Exception
     return users, post_number
@@ -70,15 +70,17 @@ def parse_html_header(header):
         post_no = post_no[1:] # remove hashmark and convert to number
 
         user = child.find("a").contents[0].string
+        user = user.strip()
 
     return user, post_no
 
 
-def read_html_file(filename, last_updated):
+def read_html_file(filename, alt_dict, last_updated):
     ''' Procedure for reading html files.
     Reads the files by traversing the html tree.'''
     users = defaultdict(list)
     post_number = ''
+
 
     with open(filename) as f_doc:
         html_doc = f_doc.read()
@@ -91,8 +93,7 @@ def read_html_file(filename, last_updated):
     for header in post_iter:
         current_user, post_number = parse_html_header(header)
 
-        if (int(post_number) <= last_updated and
-            last_updated != 500):
+        if (int(post_number) <= last_updated and last_updated != 500):
             continue
 
 
@@ -100,6 +101,10 @@ def read_html_file(filename, last_updated):
         # Not as far along as the one that was last parsed
         # Skip it and do nothing
         # If last post was the max post then ignore this.
+
+
+        if current_user in alt_dict:
+            current_user = alt_dict[current_user]
 
         post_body = header.next_sibling
         post_body = remove_quotes(post_body)
@@ -132,7 +137,7 @@ def remove_quotes(post):
 
 
 
-def read_text_file(filename):
+def read_text_file(filename, alt_dict):
     '''Procedure for reading text files.
     Reads the files line by line,
     Parses things the following way:
@@ -158,6 +163,9 @@ def read_text_file(filename):
             # In order, checks that it's a Nomination
             # it's not the message header
             # and it's not in a quote
+            if current_user in alt_dict:
+                current_user = alt_dict[current_user]
+
 
             if is_valid_nom(atoms):
                 game, track, link = nomination(current, current_user)
@@ -241,6 +249,20 @@ def decide_input():
 
     return filename
 
+def read_alts():
+    """Read from alt.txt and construct dictionary of alt-main pairs"""
+    alt_dict = {}
+
+    with open('alts.txt', 'r') as alt_file:
+        for line in alt_file.readlines():
+            temp = line.strip().split('\t')
+            main = temp[0]
+            alt = temp[1]
+            alt_dict[alt] = main
+
+    del alt_dict['Alt'] # get rid of the first line
+
+    return alt_dict
 
 
 if __name__ == "__main__":
@@ -255,7 +277,9 @@ if __name__ == "__main__":
         else:
             LAST_UPDATED = int(LAST_UPDATED)
 
-    ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION, LAST_UPDATED)
+    ALT_DICT = read_alts()
+
+    ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION, LAST_UPDATED, ALT_DICT)
     if os.path.exists('last_updated.txt'):
         if int(LAST_UPDATED) >= int(LAST_POST) and int(LAST_UPDATED) != 500:
             print "Whoops! Looks like you tried to update twice in a row!"
