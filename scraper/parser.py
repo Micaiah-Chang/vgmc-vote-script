@@ -21,7 +21,6 @@ from collections import defaultdict
 import os
 import re
 from bs4 import BeautifulSoup, Tag
-# import string
 
 # NOTE: Currently the nominations are in format game | track | link
 
@@ -216,8 +215,6 @@ def write_to_file(users):
             txt_file.write("\n")
             detect_abnormality(users, element, item)
 
-#    txt_file.close()
-
     return None
 
 def detect_abnormality(users, element, item):
@@ -232,10 +229,6 @@ def detect_abnormality(users, element, item):
     else:
         pass
 
-def alias():
-    '''Detects track names or alts via
-some preset configuration file '''
-    pass
 
 def decide_input():
     '''Ask for an input file and decide how to parse based on that.'''
@@ -280,6 +273,8 @@ if __name__ == "__main__":
     ALT_DICT = read_alts()
 
     ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION, LAST_UPDATED, ALT_DICT)
+
+    
     if os.path.exists('last_updated.txt'):
         if int(LAST_UPDATED) >= int(LAST_POST) and int(LAST_UPDATED) != 500:
             print "Whoops! Looks like you tried to update twice in a row!"
