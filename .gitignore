@@ -9,3 +9,4 @@
 .py~
 /scraper/bs4/
 *.html
+/docs/readme_old.txt
