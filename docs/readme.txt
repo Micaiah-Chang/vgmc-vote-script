@@ -1,12 +1,12 @@
 How to start tallying:
 
-Copy and paste all the relevant posts you want to tally into new_info.txt
-(Note: Don't copy the first rule post. The program will think your
-examples are legit noms)
+Copy and paste the gamefaqs source code into new_info.html. 
+
+Open up alts.txt and write the main, alt pairs as "Main<TAB>Alt". 
 
 Then run
 
-python parser.py 
+python parser.py new_info.html
 
 The program will run and update all the text files in ./users
 
@@ -16,10 +16,6 @@ If this fails, make sure you
 
 If you want to change something for a user, open up their file and change the trackname / link there
 
-This is what you need to do as the topic progresses. 
-
-If you've forgotten what the last post you updated until was, go to
-'last_updated.txt' and that will have the the most recent post.
 
 How to update the Tally Sheet:
 
