@@ -258,20 +258,31 @@ def read_alts():
     return alt_dict
 
 
-if __name__ == "__main__":
-    FILENAME = decide_input()
 
-    _, EXTENSION = os.path.splitext(FILENAME)
-
+def check_update():
+    """Check to see what the last updated post was."""
     with open('last_updated.txt') as f_update:
-        LAST_UPDATED = f_update.read()
-        if LAST_UPDATED == '':
-            LAST_UPDATED = 0
-        else:
-            LAST_UPDATED = int(LAST_UPDATED)
+        last_updated = f_update.read()
+        if last_updated == '' or last_updated == "500":
+            print "Starting a new topic! Specify which posts you wish to skip."
+            last_updated = raw_input("Ignore first x posts (default: 2)")
+            print "\n"
+            if last_updated == 'prompt' or last_updated == '':
+                last_updated = 2
 
+            last_updated = int(last_updated)
+        else:
+            last_updated = int(last_updated)
+
+    return last_updated
+
+if __name__ == "__main__":
+    LAST_UPDATED = check_update()
     ALT_DICT = read_alts()
 
+    FILENAME = decide_input()    
+    _, EXTENSION = os.path.splitext(FILENAME)
+    
     ALL_USERS, LAST_POST = read_file(FILENAME, EXTENSION, LAST_UPDATED, ALT_DICT)
 
     
