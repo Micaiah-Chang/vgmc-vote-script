@@ -22,6 +22,7 @@ import os
 import re
 from bs4 import BeautifulSoup, Tag
 import subprocess
+import glob
 
 # NOTE: Currently the nominations are in format game | track | link
 
@@ -198,24 +199,32 @@ def nomination(line, user):
 
     return game, track, link
 
+def backup_files(last_updated):
+    """Create a backup if there are text files """
+    backup_name = "post"+str(last_updated)
+
+    do_txt_files_exist = glob.glob("./users/*.txt")
+    if do_txt_files_exist:
+        try:
+            status = subprocess.call("mkdir users/"+backup_name)
+
+            status = subprocess.call("cp"+" users/*.txt "+"users/"+backup_name)
+
+
+        except OSError as e:
+            subprocess.call("rmdir users/"+backup_name)
+            print "Failed to create new backup directory. Terminating write."
+            print "Rerun script to continue"
+            raise SystemExit
+    else:
+        pass
+    
+
+
 def write_to_file(users, last_updated):
     '''Writes the user dict to all the files '''
 
-    backup_name = "post"+str(last_updated)
-    try:
-        status = subprocess.call("mkdir users/"+backup_name)
-        
-        if status == 1:
-            raise OSError
-
-        status = subprocess.call("cp"+" users/*.txt "+"users/"+backup_name)
-
-
-    except OSError as e:
-        subprocess.call("rmdir users/"+backup_name)
-        print "Failed to create new backup directory. Terminating write."
-        print "Rerun script to continue"
-        raise SystemExit
+    backup_files(last_updated)
         
     for element in users:
         if not os.path.exists('./users/'+ element +'.txt'):
@@ -292,14 +301,11 @@ def check_update():
             print "Starting a new topic! Specify which posts you wish to skip."
             last_updated = raw_input("Ignore first x posts (default: 2)")
             print "\n"
+            
             if last_updated == 'prompt' or last_updated == '':
                 last_updated = 2
 
-            last_updated = int(last_updated)
-        else:
-            last_updated = int(last_updated)
-
-    return last_updated
+    return int(last_updated)
 
 if __name__ == "__main__":
     LAST_UPDATED = check_update()
