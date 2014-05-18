@@ -21,6 +21,7 @@ from collections import defaultdict
 import os
 import re
 from bs4 import BeautifulSoup, Tag
+import subprocess
 
 # NOTE: Currently the nominations are in format game | track | link
 
@@ -196,8 +197,25 @@ def nomination(line, user):
 
     return game, track, link
 
-def write_to_file(users):
+def write_to_file(users, last_updated):
     '''Writes the user dict to all the files '''
+
+    backup_name = "post"+str(last_updated)
+    try:
+        status = subprocess.call("mkdir users/"+backup_name)
+        
+        if status == 1:
+            raise OSError
+
+        status = subprocess.call("cp"+" users/*.txt "+"users/"+backup_name)
+
+
+    except OSError as e:
+        subprocess.call("rmdir users/"+backup_name)
+        print "Failed to create new backup directory. Terminating write."
+        print "Rerun script to continue"
+        raise SystemExit
+        
     for element in users:
         if not os.path.exists('./users/'+ element +'.txt'):
             txt_file = open('./users/'+ element +'.txt', 'w')
@@ -291,8 +309,10 @@ if __name__ == "__main__":
             print "Whoops! Looks like you tried to update twice in a row!"
             print "Failing gracefully so you don't write twice."
             raise SystemExit
+        else:
+            print "Updating from", LAST_UPDATED, "to", LAST_POST
 
-    write_to_file(ALL_USERS)
+    write_to_file(ALL_USERS, LAST_UPDATED)
 
     with open('last_updated.txt', 'w') as UPDATE:
         UPDATE.write(str(LAST_POST))
