@@ -21,9 +21,25 @@ to update noms in a linear scan, instead of O(n^2) time.
 
 
 Nice to have:
-Detect Series <- Impossible
-Determine how to deal with Aliases/Noisy data.
 Error checking.
+
+
+TO-DO:
+05/17/2014
+Have the nominations.txt print out files in the format:
+
+Username
+
+Doubles:
+1
+2
+3 ...
+
+Singles
+6
+7
+
+Proposal: Parse out doubles and singles into two separate lists
 """
 
 #from sys import
