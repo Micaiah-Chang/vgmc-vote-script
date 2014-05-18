@@ -87,7 +87,7 @@ def compare_entries_in_nom(game, track, nomination_list):
 
 
 class User(object):
-    '''Implements a user with tracks, games and nominations '''
+    """Implements a user with tracks, games and nominations """
     def __init__(self, name):
         self.noms = {}
         self.name = name
