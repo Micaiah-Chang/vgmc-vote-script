@@ -104,6 +104,7 @@ def read_html_file(filename, alt_dict, last_updated):
 
 
         if current_user in alt_dict:
+            print "Counting", current_user, "as", alt_dict[current_user]+"'s", "alt"
             current_user = alt_dict[current_user]
 
         post_body = header.next_sibling
@@ -267,6 +268,12 @@ def read_alts():
     with open('alts.txt', 'r') as alt_file:
         for line in alt_file.readlines():
             temp = line.strip().split('\t')
+            if len(temp) < 2:
+                print "Misformatted line!"
+                print line
+                print "Skipping to next line."
+                continue
+            
             main = temp[0]
             alt = temp[1]
             alt_dict[alt] = main
