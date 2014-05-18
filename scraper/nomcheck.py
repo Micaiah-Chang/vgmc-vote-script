@@ -25,21 +25,8 @@ Error checking.
 
 
 TO-DO:
-05/17/2014
-Have the nominations.txt print out files in the format:
-
-Username
-
-Doubles:
-1
-2
-3 ...
-
-Singles
-6
-7
-
-Proposal: Parse out doubles and singles into two separate lists
+Refactor this file.
+Start with write_to_nom_file
 """
 
 #from sys import
@@ -231,14 +218,14 @@ def read_users(folder):
 
     listing = os.listdir(folder)
     for infile in listing:
-
-        with open(folder + infile) as text_file:
-            name = infile.split('.')[0].strip()
-            current_user = User(name)
-            all_users.append(current_user)
-            lines = [x.strip() for x in text_file.readlines()]
-            pass_noms_to_user(current_user, lines)
-
+        if infile[-4:] == ".txt":
+            with open(folder + infile) as text_file:
+                name = infile.split('.')[0].strip()
+                current_user = User(name)
+                all_users.append(current_user)
+                lines = [x.strip() for x in text_file.readlines()]
+                pass_noms_to_user(current_user, lines)
+            
 
     return all_users
 
@@ -281,27 +268,37 @@ def write_to_nom_file(all_users, nom_file):
 
     ---
     '''
+
     for current_user in all_users:
+        
         nom_file.write(current_user.name+'\n\n')
-        for (game, track) in current_user.noms:
-            nom_file.write(game+'\n')
-            nom_file.write(track+'\n')
 
-            for element in current_user.noms[(game, track)]:
+        double_noms = []
+        single_noms = []
 
-                if type(element) is bool and element == True:
-                    nom_file.write('Double\n')
-                if type(element) is bool:
-                    pass
-                else:
-                    nom_file.write(element+'\n')
+        for game, track in current_user.noms:
+            link, double_flag = current_user.noms[(game, track)]
+            nom_line = ' | '.join([game,track,link])
 
-            nom_file.write('\n')
+            if double_flag:
+                double_noms.append(nom_line)
+            else:
+                single_noms.append(nom_line)
 
-        #Switch to below in final
-        # open('nominations.txt, 'a')
-        nom_file.write('---\n\n')
+        if double_noms:
+            nom_file.write("Doubles:"+'\n')
+            for number, line in enumerate(double_noms):
+                nom_file.write(str(number+1)+". "+line+'\n')
+
+        if single_noms:
+            nom_file.write("Singles:"+'\n')
+            for number, line in enumerate(single_noms):
+                nom_file.write(str(number+1)+". "+line+'\n')
+
+        nom_file.write("---\n\n")
+        
     nom_file.close()
+
 
 def nominations_left(all_users):
     '''Counts the number of nominations a user has left'''
@@ -350,6 +347,8 @@ def consolidate(users, tally_file):
                 tally_file.write(element+' | ')
             tally_file.write('\n')
         tally_file.write('\n')
+
+        
 
 def invert_dict(dic):
     '''Inverts a dictionary, so that instead of Track -> Nominations
