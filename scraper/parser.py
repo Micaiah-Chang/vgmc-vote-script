@@ -224,36 +224,39 @@ def backup_files(last_updated):
 def write_to_file(users, last_updated):
     '''Writes the user dict to all the files '''
 
-    backup_files(last_updated)
+    # backup_files(last_updated)
         
-    for element in users:
-        if not os.path.exists('./users/'+ element +'.txt'):
-            txt_file = open('./users/'+ element +'.txt', 'w')
+    for user in users:
+        if not os.path.exists('./users/'+ user +'.txt'):
+            txt_file = open('./users/'+ user +'.txt', 'w')
         else:
-            # txt_file = open('./users/'+ element +'.txt', 'w')
+            # txt_file = open('./users/'+ user +'.txt', 'w')
             # Change to a when time for real thing
-            txt_file = open('./users/'+ element +'.txt', 'a')
+            txt_file = open('./users/'+ user +'.txt', 'a')
 
 
-        for item in users[element]:
-            for entry in item:
-                if not entry.isdigit():
-                    txt_file.write(entry+"\n")
+        for (game, track, link, post_number)in users[user]:
+            try:
+                entry = "\n".join([game,track,link])
+                txt_file.write(entry+"\n")
+            except UnicodeEncodeError:
+                print "Failed on", user+"'s", "post."
+                print "Check post number", post_number
 
             txt_file.write("\n")
-            detect_abnormality(users, element, item)
+            detect_abnormality(users, user, users[user])
 
     return None
 
-def detect_abnormality(users, element, item):
+def detect_abnormality(users, user, item):
     '''Reports irregularities in nominations '''
     user_things = [part for part in item]
     if "TRACK MISSING" in user_things:
-        print "Post number", item[3], "from", element, "is missing a track!"
+        print "Post number", item[3], "from", user, "is missing a track!"
     elif "LINK MISSING" in user_things:
-        print "Post number", item[3], "from", element, "is missing a link."
-    elif users[element] == []:
-        print element, "has made no nominations in post no.", item[3]
+        print "Post number", item[3], "from", user, "is missing a link."
+    elif users[user] == []:
+        print user, "has made no nominations in post no.", item[3]
     else:
         pass
 
