@@ -182,7 +182,8 @@ def read_text_file(filename, alt_dict):
 
 def nomination(line, user):
     '''Parsing each legal line as a nomination.'''
-    item = [element.strip() for element in line.split("|") if element != '']
+    item = [element.strip() for element in line.split("|")]
+    item = [element   for element in item if element != ""]
     # Split up the nomination into three parts:
     # game, track, link
 
