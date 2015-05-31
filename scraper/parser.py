@@ -197,6 +197,9 @@ def write_to_file(users):
     '''Writes the user dict to all the files
     Users => Dictionary[Username -> Nomination], last_updated => Int'''
 
+    if not os.path.exists('./users'):
+        os.makedirs('./users')
+
     # Iterates over every user's file
     for user in users:
         if not os.path.exists('./users/'+ user +'.txt'):
