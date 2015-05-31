@@ -114,12 +114,14 @@ def read_html_file(filename, alt_dict, last_updated):
         html_doc = f_doc.read()
         soup = BeautifulSoup(html_doc)
 
-    post_iter = soup.find_all("tr", "top")
+    post_iter = soup.find_all("div", {"class": "msg_infobox"})
 
     # Find every post via its message header
     for header in post_iter:
         current_user, post_number = parse_html_header(header)
 
+        if current_user is None:
+            continue
         # Ignore the post if we've seen it before on a previous run
         # Second part is an edge case for Topics beyond the first
         if int(post_number) <= last_updated and last_updated != 500:
@@ -141,17 +143,15 @@ def read_html_file(filename, alt_dict, last_updated):
 def parse_html_header(header):
     '''Find post number and username from message header.
     HTML from 05/14/2014'''
-    for child in header.children:
-        msg_txt = child.find("div").contents
-        re_post_number = re.compile(r"#\d+")
-        has_post_number = re_post_number.match(msg_txt[0])
-        post_no = has_post_number.group()
-        post_no = post_no[1:] # remove hashmark and convert to number
+    if "deleted" in header["class"]:
+	    return None, None
 
-        user = child.find("a").contents[0].string
-        user = user.strip()
+    user_name = header.select("a.name")[0].get_text()
 
-    return user, post_no
+    post_no_txt = header.select("span.message_num")[0].get_text()
+    post_no = int(post_no_txt[1:]) # remove hashmark and convert to number
+
+    return user_name, post_no
 
 
 def remove_quotes(post):
