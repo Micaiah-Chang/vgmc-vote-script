@@ -326,16 +326,16 @@ def backup_files(last_updated):
 
     if do_txt_files_exist:
         try:
-            subprocess.call("mkdir users/"+backup_name)
             user_folder = os.path.abspath("./users/")
             src_files = os.listdir(user_folder)
             backup_folder = os.path.join(user_folder, backup_name)
+            if not os.path.exists: os.makedirs(backup_folder)
             for file_name in src_files:
                 full_file_name = os.path.join(user_folder, file_name)
                 if (os.path.isfile(full_file_name)):
                     shutil.copy2(full_file_name, backup_folder)
         except OSError:
-            subprocess.call("rmdir users/"+backup_name)
+            shutuil.rmtree(backup_folder)
             print "rmdir users/"+backup_name
             print "Failed to create new backup directory. Terminating write."
             print "Rerun script to continue"
