@@ -185,7 +185,7 @@ def parse_nom(line, user):
 
     if len(item) == 3:
         game, track, link = item[:3]
-        link = link.split()
+        link = link.split()[0]
     elif len(item) == 2:
         game, track = item[:2]
     elif len(item) == 1:
@@ -201,7 +201,6 @@ def write_to_file(users):
 
     if not os.path.exists('./users'):
         os.makedirs('./users')
-
     # Iterates over every user's file
     for user in users:
         if not os.path.exists('./users/'+ user +'.txt'):
@@ -327,14 +326,9 @@ def backup_files(last_updated):
 
     if do_txt_files_exist:
         try:
-            user_folder = os.path.abspath("./users/")
-            src_files = os.listdir(user_folder)
-            backup_folder = os.path.join(user_folder, backup_name)
-            if not os.path.exists: os.makedirs(backup_folder)
-            for file_name in src_files:
-                full_file_name = os.path.join(user_folder, file_name)
-                if (os.path.isfile(full_file_name)):
-                    shutil.copy2(full_file_name, backup_folder)
+            src_folder = os.path.abspath("./users/")
+            backup_folder = os.path.join(os.path.abspath("./data"), backup_name)
+            shutil.copytree(src_folder, backup_folder)
         except OSError:
             shutuil.rmtree(backup_folder)
             print "rmdir users/"+backup_name
