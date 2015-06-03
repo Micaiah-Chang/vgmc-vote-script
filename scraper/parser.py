@@ -185,6 +185,7 @@ def parse_nom(line, user):
 
     if len(item) == 3:
         game, track, link = item[:3]
+        link = link.split()
     elif len(item) == 2:
         game, track = item[:2]
     elif len(item) == 1:
