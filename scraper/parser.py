@@ -289,7 +289,7 @@ def read_text_file(filename, alt_dict):
     Checks to see if POSTED is next line, indicates username.'''
     users = defaultdict(list)
     post_number = ''
-
+    current_user = None
 
     with open(filename) as input_file:
         current = input_file.readline()
