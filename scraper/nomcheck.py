@@ -35,7 +35,7 @@ from collections import defaultdict
 import math
 
 MAX_NOMS = 10
-
+SAME_GAME_MAX = 1
 
 class Nominations(object):
     '''Class which collects all nominations with track and link.
@@ -134,7 +134,7 @@ class User(object):
             existing_game = key[0]
             if existing_game == game and track != key[1]:
                 tracks_from_same_game += 1
-                if tracks_from_same_game == 2:
+                if tracks_from_same_game == SAME_GAME_MAX:
                     print "Too many tracks from this game!"
                     print "Dropping", track, "in", game, \
                         "for", self.name
