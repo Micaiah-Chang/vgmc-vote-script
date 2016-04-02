@@ -330,7 +330,7 @@ def backup_files(last_updated):
             backup_folder = os.path.join(os.path.abspath("./data"), backup_name)
             shutil.copytree(src_folder, backup_folder)
         except OSError:
-            shutuil.rmtree(backup_folder)
+            shutil.rmtree(backup_folder)
             print "rmdir users/"+backup_name
             print "Failed to create new backup directory. Terminating write."
             print "Rerun script to continue"
