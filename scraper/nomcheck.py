@@ -34,10 +34,14 @@ import os
 from collections import defaultdict
 import math
 
+MAX_NOMS = 10
+
 
 class Nominations(object):
     '''Class which collects all nominations with track and link.
     Only grabs the track with the best link and tracks.'''
+    MAX_DOUBLES = 0
+
     def __init__(self):
         self.noms = []
 
@@ -104,7 +108,7 @@ class User(object):
 
 
         double = False
-        if game.startswith('++') and self.doubles < 5:
+        if game.startswith('++') and self.doubles < 0:
             try:
                 double_value = self.noms.get((game, track))[1]
                 if double_value == True:
@@ -113,7 +117,7 @@ class User(object):
                 pass
             double = True
             self.doubles += 1
-        elif game.startswith('++') and self.doubles == 5:
+        elif game.startswith('++') and self.doubles == 0:
             print 'User,', self.name, \
                 'has too many doubles! Dropping double for', track
             return False
@@ -157,7 +161,7 @@ class User(object):
             # If the track exists and is doubled, denom it.
             # And try to update the nominations table
 
-        elif len(self.noms) < 20 or (double == True):
+        elif len(self.noms) < MAX_NOMS or (double == True):
             try:
                 game, track, link = NOMINATIONS.populate(game, track, link)
             except TypeError:
@@ -306,7 +310,7 @@ def nominations_left(all_users):
     last_updated = open('last_updated.txt', 'r').read()
     nom_file.write("Updated up to post: "+last_updated+"\n")
     for current_user in all_users:
-        noms_left = 20 - len(current_user.noms)
+        noms_left = MAX_NOMS - len(current_user.noms)
         doubles_left = 5 - current_user.doubles
         nom_file.write(current_user.name+'\n'+"User has "+
                        str(noms_left)+
