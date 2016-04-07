@@ -34,7 +34,8 @@ import os
 from collections import defaultdict
 import math
 
-MAX_NOMS = 10
+MAX_NOMS = 30
+MAX_DOUBLES = 2
 SAME_GAME_MAX = 1
 
 class Nominations(object):
@@ -108,7 +109,7 @@ class User(object):
 
 
         double = False
-        if game.startswith('++') and self.doubles < 0:
+        if game.startswith('++') and self.doubles < MAX_DOUBLE:
             try:
                 double_value = self.noms.get((game, track))[1]
                 if double_value == True:
@@ -117,7 +118,7 @@ class User(object):
                 pass
             double = True
             self.doubles += 1
-        elif game.startswith('++') and self.doubles == 0:
+        elif game.startswith('++') and self.doubles == MAX_DOUBLE:
             print 'User,', self.name, \
                 'has too many doubles! Dropping double for', track
             return False
