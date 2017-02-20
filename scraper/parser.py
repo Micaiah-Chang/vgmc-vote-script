@@ -145,9 +145,11 @@ def parse_html_header(header):
     '''Find post number and username from message header.
     HTML from 05/14/2014'''
     if "deleted" in header["class"]:
-	    return None, None
+        return None, None
 
-    user_name = header.select("a.name")[0].get_text()
+    raw_name_div = header.select("a.name")[0]
+    raw_name_text= raw_name_div.get_text()
+    user_name = raw_name_text.rstrip()
 
     post_no_txt = header.select("span.message_num")[0].get_text()
     post_no = int(post_no_txt[1:]) # remove hashmark and convert to number
