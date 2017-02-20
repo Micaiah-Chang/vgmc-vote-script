@@ -34,13 +34,13 @@ import os
 from collections import defaultdict
 import math
 
-MAX_NOMS = 10
-SAME_GAME_MAX = 1
+MAX_NOMS = 20
+SAME_GAME_MAX = 2
+MAX_DOUBLES = 5
 
 class Nominations(object):
     '''Class which collects all nominations with track and link.
     Only grabs the track with the best link and tracks.'''
-    MAX_DOUBLES = 0
 
     def __init__(self):
         self.noms = []
@@ -101,9 +101,6 @@ class User(object):
     def add_nom(self, game, track, link):
         '''Adds a nomination, throwing an error message if noms are full.
         Should have the following functionality in future:
-        DONE: Get rid of nom if I see -
-        DONE: Checking for 5 doubles
-        DONE: Define structure of count (Bool or number?)
         LUXURY FEATURE: Checking for mistyped track names and stuff'''
 
 
@@ -117,18 +114,16 @@ class User(object):
                 pass
             double = True
             self.doubles += 1
-        elif game.startswith('++') and self.doubles == 0:
+        elif game.startswith('++') and self.doubles == MAX_DOUBLES:
             print 'User,', self.name, \
                 'has too many doubles! Dropping double for', track
             return False
         else:
             pass
 
-        
         game = game.lstrip('+ ')
         # Above Code checks for doubles
 
-        
         tracks_from_same_game = 0
         for key in self.noms.iterkeys():
             existing_game = key[0]
@@ -141,9 +136,8 @@ class User(object):
                     return False
         # Above Code Checks for less than two tracks from the same game.
 
-        if (game, track) in self.noms and \
-                double == False and \
-                self.doubles < 5:
+        if ((game, track) in self.noms and double == False
+             and self.doubles < MAX_DOUBLES):
             double = True
             self.doubles += 1
 
@@ -167,7 +161,7 @@ class User(object):
             except TypeError:
                 pass
             self.noms[(game, track)] = (link, double)
-            # If there are less than 20 nominations and less than 5 doubles,
+            # If there are less than max nominations and less than max doubles,
             # Update the user nominations and nominations table
         else:
             print 'Nominations full for', self.name, \
@@ -311,7 +305,7 @@ def nominations_left(all_users):
     nom_file.write("Updated up to post: "+last_updated+"\n")
     for current_user in all_users:
         noms_left = MAX_NOMS - len(current_user.noms)
-        doubles_left = 5 - current_user.doubles
+        doubles_left = MAX_DOUBLES - current_user.doubles
         nom_file.write(current_user.name+'\n'+"User has "+
                        str(noms_left)+
                        " nominations and "+
