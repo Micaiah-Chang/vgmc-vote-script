@@ -168,14 +168,17 @@ def remove_quotes(post):
 
 def noms_from_post(users, current_user, post_body, post_number):
     '''Obtains nomations from an html version of post'''
+
     for line in post_body.strings:
         atoms = line.split()
         if is_valid_nom(atoms):
             game, track, link = parse_nom(line, current_user)
             users[current_user].append((game, track, link, post_number))
-
     return users
 
+
+def parse_link(link):
+    return link
 
 def parse_nom(line, user):
     '''Parsing each legal line as a nomination.'''
@@ -195,7 +198,6 @@ def parse_nom(line, user):
         print "WARNING!", user, " hasn't submitted a track!"
 
     return game, track, link
-
 
 def write_to_file(users):
     '''Writes the user dict to all the files
