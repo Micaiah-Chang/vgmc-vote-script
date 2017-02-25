@@ -94,7 +94,7 @@ class User(object):
         else:
             if track.lstrip('#').isdigit() is True:
                 return False
-            print 'Undefined behavior for', self.name, 'and track', track
+            print('Undefined behavior for', self.name, 'and track', track)
             return False
         return True
 
@@ -115,8 +115,7 @@ class User(object):
             double = True
             self.doubles += 1
         elif game.startswith('++') and self.doubles == MAX_DOUBLES:
-            print 'User,', self.name, \
-                'has too many doubles! Dropping double for', track
+            print('User,', self.name, 'has too many doubles! Dropping double for', track)
             return False
         else:
             pass
@@ -125,14 +124,13 @@ class User(object):
         # Above Code checks for doubles
 
         tracks_from_same_game = 0
-        for key in self.noms.iterkeys():
+        for key in self.noms.keys():
             existing_game = key[0]
             if existing_game == game and track != key[1]:
                 tracks_from_same_game += 1
                 if tracks_from_same_game == SAME_GAME_MAX:
-                    print "Too many tracks from this game!"
-                    print "Dropping", track, "in", game, \
-                        "for", self.name
+                    print("Too many tracks from this game!")
+                    print("Dropping", track, "in", game, "for", self.name)
                     return False
         # Above Code Checks for less than two tracks from the same game.
 
@@ -164,8 +162,7 @@ class User(object):
             # If there are less than max nominations and less than max doubles,
             # Update the user nominations and nominations table
         else:
-            print 'Nominations full for', self.name, \
-                'discarding', track
+            print('Nominations full for', self.name, 'discarding', track)
             return False
         # Catch All
         return True
@@ -202,7 +199,7 @@ class User(object):
 
             return True
         else:
-            print 'Error!', track, 'does not exist as a track for', self.name
+            print('Error!', track, 'does not exist as a track for', self.name)
             return False
 
 
@@ -352,7 +349,7 @@ def invert_dict(dic):
     '''Inverts a dictionary, so that instead of Track -> Nominations
     It becomes Nominations -> Track'''
     inverted_dict = defaultdict(set)
-    for tracks, nomination in dic.iteritems():
+    for tracks, nomination in dic.items():
         inverted_dict[nomination].add(tracks)
     return inverted_dict
 
@@ -362,7 +359,7 @@ def tsv_spreadsheet(all_users):
         # Write the header
         upload.write('Game\tSong\tLink\t')
         number_of_users = len(all_users)
-        for user_number in xrange(number_of_users):
+        for user_number in range(number_of_users):
             upload.write(all_users[user_number].name+'\t')
         upload.write('\n')
 
@@ -371,10 +368,10 @@ def tsv_spreadsheet(all_users):
         for element in NOMINATIONS.noms:
             front = '\t'.join(element)
             upload.write(front+'\t')
-            for user_number in xrange(number_of_users):
+            for user_number in range(number_of_users):
                 current_user = all_users[user_number]
                 lowered_noms = {tuple(map(str.lower, k)):v \
-                                    for k, v in current_user.noms.items()}
+                                    for k, v in list(current_user.noms.items())}
                 if (element[0].lower(), element[1].lower()) in lowered_noms:
                     if lowered_noms[(element[0].lower(), \
                                          element[1].lower())][1] == True:

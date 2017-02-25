@@ -39,8 +39,8 @@ def check_update():
 
         is_new_topic = last_updated == '' or last_updated == "500"
         if is_new_topic:
-            print "Starting a new topic! Specify which posts you wish to skip."
-            last_updated = raw_input("Ignore first x posts (default: 2)\n")
+            print("Starting a new topic! Specify which posts you wish to skip.")
+            last_updated = input("Ignore first x posts (default: 2)\n")
 
             no_response = (last_updated == 'prompt' or last_updated == '')
             if no_response:
@@ -59,9 +59,9 @@ def read_alts():
             temp = line.strip().split('\t')
 
             if len(temp) < 2:
-                print "Misformatted line!"
-                print line
-                print "Skipping to next line."
+                print("Misformatted line!")
+                print(line)
+                print("Skipping to next line.")
                 continue
 
             main_acc = temp[0]
@@ -80,8 +80,8 @@ def decide_input():
         _, filename = argv[0], argv[1]
     else:
         default = "new_info.html"
-        print "File? Default: ", default
-        filename = raw_input('--> ')
+        print("File? Default: ", default)
+        filename = input('--> ')
 
         if filename == 'prompt' or filename == '':
             filename = default
@@ -131,7 +131,7 @@ def read_html_file(filename, alt_dict, last_updated):
         # Spot alts and write treat them as the same as their main
         if current_user in alt_dict:
             main_acc = alt_dict[current_user]
-            print "Counting", current_user, "as", main_acc+"'s"+" alt"
+            print("Counting", current_user, "as", main_acc+"'s"+" alt")
             current_user = main_acc
 
         post_body = header.next_sibling
@@ -195,7 +195,7 @@ def parse_nom(line, user):
         game, track = item[:2]
     elif len(item) == 1:
         game = item[0]
-        print "WARNING!", user, " hasn't submitted a track!"
+        print("WARNING!", user, " hasn't submitted a track!")
 
     return game, track, link
 
@@ -219,8 +219,8 @@ def write_to_file(users):
                 txt_file.write(entry+"\n")
             # Current program not compatible with unicode
             except UnicodeEncodeError:
-                print "Failed on", user+"'s", "post."
-                print "Check post number", post_number
+                print("Failed on", user+"'s", "post.")
+                print("Check post number", post_number)
 
             txt_file.write("\n")
             detect_abnormality(users, user, users[user])
@@ -231,11 +231,11 @@ def detect_abnormality(users, user, nomination):
     unpacked_noms = [part for part in nomination]
 
     if "TRACK MISSING" in unpacked_noms:
-        print "Post number", nomination[3], "from", user, "is missing a track!"
+        print("Post number", nomination[3], "from", user, "is missing a track!")
     elif "LINK MISSING" in unpacked_noms:
-        print "Post number", nomination[3], "from", user, "is missing a link."
+        print("Post number", nomination[3], "from", user, "is missing a link.")
     elif users[user] == []:
-        print user, "has made no nominations in post no.", nomination[3]
+        print(user, "has made no nominations in post no.", nomination[3])
     else:
         pass
 
@@ -245,7 +245,7 @@ def display_update(last_post):
     last_post => Str containing last updated post"""
     with open(LAST_UPDATE_FILE, 'w') as update:
         update.write(str(last_post))
-        print "File updating until post", last_post, "in the topic."
+        print("File updating until post", last_post, "in the topic.")
 
 
 def double_update_check(last_updated, last_post):
@@ -254,11 +254,11 @@ def double_update_check(last_updated, last_post):
     last_updated => str from LAST_UPDATE_FILE from before program was run
     last_post => str showing what the latest post the program has parsed."""
     if int(last_updated) >= int(last_post) and int(last_updated) != 500:
-        print "Whoops! Looks like you tried to update twice in a row!"
-        print "Failing gracefully so you don't write twice."
+        print("Whoops! Looks like you tried to update twice in a row!")
+        print("Failing gracefully so you don't write twice.")
         raise SystemExit
     else:
-        print "Updating from", last_updated, "to", last_post
+        print("Updating from", last_updated, "to", last_post)
 
 
 def is_txt_message_header(line):
@@ -335,12 +335,12 @@ def backup_files(last_updated):
             shutil.copytree(src_folder, backup_folder)
         except OSError:
             shutil.rmtree(backup_folder)
-            print "rmdir users/"+backup_name
-            print "Failed to create new backup directory. Terminating write."
-            print "Rerun script to continue"
+            print("rmdir users/"+backup_name)
+            print("Failed to create new backup directory. Terminating write.")
+            print("Rerun script to continue")
             raise SystemExit
     else:
-        print "Nothing to back up."
+        print("Nothing to back up.")
 
 
 def main():
