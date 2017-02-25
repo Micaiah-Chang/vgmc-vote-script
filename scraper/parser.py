@@ -113,7 +113,7 @@ def read_html_file(filename, alt_dict, last_updated):
 
     with open(filename) as f_doc:
         html_doc = f_doc.read()
-        soup = BeautifulSoup(html_doc)
+        soup = BeautifulSoup(html_doc, "html.parser")
 
     post_iter = soup.find_all("div", {"class": "msg_infobox"})
 
