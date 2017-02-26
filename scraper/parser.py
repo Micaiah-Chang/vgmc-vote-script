@@ -68,7 +68,7 @@ def read_alts():
             alt_acc = temp[1]
             alt_dict[alt_acc] = main_acc
 
-    del alt_dict['Alt'] # get rid of the first line
+    alt_dict.pop('Alt', None) # get rid of the first line
 
     return alt_dict
 
