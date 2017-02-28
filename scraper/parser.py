@@ -30,6 +30,7 @@ import glob
 import shutil
 
 LAST_UPDATE_FILE = 'last_updated.txt'
+GAMEFAQS_ENCODING = 'ISO-8859-1'
 
 def check_update():
     """Check to see what the last updated post was via.
@@ -111,7 +112,7 @@ def read_html_file(filename, alt_dict, last_updated):
     users = defaultdict(list)
     post_number = ''
 
-    with open(filename) as f_doc:
+    with open(filename, encoding=GAMEFAQS_ENCODING) as f_doc:
         html_doc = f_doc.read()
         soup = BeautifulSoup(html_doc, "html.parser")
 
@@ -208,9 +209,9 @@ def write_to_file(users):
     # Iterates over every user's file
     for user in users:
         if not os.path.exists('./users/'+ user +'.txt'):
-            txt_file = open('./users/'+ user +'.txt', 'w')
+            txt_file = open('./users/'+ user +'.txt', 'w', encoding=GAMEFAQS_ENCODING)
         else:
-            txt_file = open('./users/'+ user +'.txt', 'a')
+            txt_file = open('./users/'+ user +'.txt', 'a', encoding=GAMEFAQS_ENCODING)
 
         # Writes each user's individual nom to their txt file
         for (game, track, link, post_number) in users[user]:
@@ -221,6 +222,7 @@ def write_to_file(users):
             except UnicodeEncodeError:
                 print("Failed on", user+"'s", "post.")
                 print("Check post number", post_number)
+                print(game, track, link)
 
             txt_file.write("\n")
             detect_abnormality(users, user, users[user])
