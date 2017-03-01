@@ -135,8 +135,9 @@ def read_html_file(filename, alt_dict, last_updated):
             print("Counting", current_user, "as", main_acc+"'s"+" alt")
             current_user = main_acc
 
-        post_body = header.next_sibling
+        post_body = header.next_sibling.find('div', class_='msg_body')
         post_body = remove_quotes(post_body)
+        post_body = remove_signature(post_body)
         users = noms_from_post(users, current_user, post_body, post_number)
 
     return users, post_number
@@ -157,20 +158,31 @@ def parse_html_header(header):
 
     return user_name, post_no
 
+def remove_signature(post_body):
+    for tag in post_body.findAll('div', class_='signature'):
+        tag.extract()
+
+    return post_body
+
 
 def remove_quotes(post):
     '''Removes quoted messages from post'''
-    for tag in post.descendants:
-        if isinstance(tag, Tag) and not tag.blockquote is None:
-            tag.blockquote.extract()
+    for blockquote in post.find_all('blockquote'''):
+        blockquote.extract()
 
     return post
+
+def replace_br_with_line_break(bs_obj):
+    for br in bs_obj.find_all("br"):
+        br.replace_with("\n")
+    return bs_obj
 
 
 def noms_from_post(users, current_user, post_body, post_number):
     '''Obtains nomations from an html version of post'''
+    br_removed_post_body = replace_br_with_line_break(post_body)
 
-    for line in post_body.strings:
+    for line in br_removed_post_body.get_text(separator='').split('\n'):
         atoms = line.split()
         if is_valid_nom(atoms):
             game, track, link = parse_nom(line, current_user)
