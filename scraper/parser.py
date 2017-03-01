@@ -177,10 +177,6 @@ def noms_from_post(users, current_user, post_body, post_number):
             users[current_user].append((game, track, link, post_number))
     return users
 
-
-def parse_link(link):
-    return link
-
 def parse_nom(line, user):
     '''Parsing each legal line as a nomination.'''
     item = [element.strip() for element in line.split("|")]
