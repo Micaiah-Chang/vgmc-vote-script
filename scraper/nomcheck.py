@@ -105,7 +105,7 @@ class User(object):
 
 
         double = False
-        if game.startswith('++') and self.doubles < 0:
+        if game.startswith('++') and self.doubles < MAX_DOUBLES:
             try:
                 double_value = self.noms.get((game, track))[1]
                 if double_value == True:
