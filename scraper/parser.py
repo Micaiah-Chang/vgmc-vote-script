@@ -180,7 +180,7 @@ def noms_from_post(users, current_user, post_body, post_number):
 def parse_nom(line, user):
     '''Parsing each legal line as a nomination.'''
     item = [element.strip() for element in line.split("|")]
-    item = [element   for element in item if element != ""]
+    item = [element for element in item if element != ""]
     # Split up the nomination into three parts: game, track, link
 
     game, track, link = '', 'TRACK MISSING', 'LINK MISSING'
