@@ -134,7 +134,6 @@ def read_html_file(filename, alt_dict, last_updated):
             main_acc = alt_dict[current_user]
             print("Counting", current_user, "as", main_acc+"'s"+" alt")
             current_user = main_acc
-
         post_body = header.next_sibling.find('div', class_='msg_body')
         post_body = remove_quotes(post_body)
         post_body = remove_signature(post_body)
@@ -152,7 +151,7 @@ def parse_html_header(header):
     raw_name_div = header.select("a.name")[0]
     raw_name_text= raw_name_div.get_text()
     user_name = raw_name_text.rstrip()
-
+     
     post_no_txt = header.select("span.message_num")[0].get_text()
     post_no = int(post_no_txt[1:]) # remove hashmark and convert to number
 
@@ -173,24 +172,30 @@ def remove_quotes(post):
     return post
 
 def replace_br_with_line_break(bs_obj):
+    
     for br in bs_obj.find_all("br"):
-        br.replace_with("\n")
+        br.unwrap()
     return bs_obj
 
 
 def noms_from_post(users, current_user, post_body, post_number):
     '''Obtains nomations from an html version of post'''
-    br_removed_post_body = replace_br_with_line_break(post_body)
+    if current_user in ('azuarc',):
+	    return users
 
-    for line in br_removed_post_body.get_text(separator='').split('\n'):
+    br_removed_post_body = replace_br_with_line_break(post_body)
+    separated_lines = br_removed_post_body.get_text(separator='\n')
+    for line in separated_lines.split("\n"):
         atoms = line.split()
         if is_valid_nom(atoms):
             game, track, link = parse_nom(line, current_user)
             users[current_user].append((game, track, link, post_number))
+            
     return users
 
 def parse_nom(line, user):
     '''Parsing each legal line as a nomination.'''
+    
     item = [element.strip() for element in line.split("|")]
     item = [element for element in item if element != ""]
     # Split up the nomination into three parts: game, track, link
